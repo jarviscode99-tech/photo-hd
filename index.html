@@ -1,0 +1,110 @@
+<meta name="google-adsense-account" content="ca-pub-7595680087336429">
+<style>
+  body{background:#0b0b10;color:#f2f2f5;font-family:system-ui,sans-serif;margin:0;padding:0;text-align:center}
+  .wrap{max-width:720px;margin:0 auto;padding:18px 16px 60px}
+  .logo{display:flex;align-items:center;gap:9px;font-weight:800;font-size:20px}
+  .logoMark{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,#22c1ee,#8b5cf6);display:flex;align-items:center;justify-content:center}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 2px}
+  .drop{border:2px dashed #3a3a48;border-radius:18px;background:#14141c;padding:34px 18px;cursor:pointer}
+  .drop.drag{border-color:#22c1ee;background:#12202a}
+  .goBtn{width:100%;background:linear-gradient(135deg,#22c1ee,#6d28d9);border:0;color:#fff;font-size:17px;font-weight:800;border-radius:12px;padding:14px;cursor:pointer;margin-top:12px}
+  .goBtn:disabled{opacity:.55}
+  select{background:#14141c;border:1px solid #333;color:#fff;border-radius:10px;padding:10px 12px;font-size:14px;margin:4px}
+  .row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+  canvas{max-width:100%;border-radius:12px;background:#000;margin-top:10px}
+  .card{background:#14141c;border:1px solid #262633;border-radius:14px;padding:14px;margin-top:12px;text-align:left;font-size:14px;line-height:1.6}
+  .btnRow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .btnRow button,.btnRow a{flex:1;min-width:110px;background:#22222e;border:1px solid #3a3a48;color:#fff;border-radius:10px;padding:10px;cursor:pointer;font-size:14px;text-decoration:none;text-align:center}
+  .btnRow button.primary{background:#22c55e;border-color:#22c55e;color:#06230f;font-weight:800}
+  .adSlot{border:1px dashed #3a3a48;border-radius:12px;color:#66667a;font-size:12px;padding:14px;margin:16px 0}
+  .footer{color:#66667a;font-size:12px;margin-top:22px;line-height:1.7}
+  .comp{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:520px){.comp{grid-template-columns:1fr}}
+  .comp img{width:100%;border-radius:10px;background:#000}
+  #fileInput{display:none}
+</style>
+<div class="wrap">
+  <div class="topbar"><div class="logo"><div class="logoMark">📸</div> photoHD</div><div style="font-size:12px;color:#9a9ab0;">Low → HD/4K</div></div>
+  <div class="adSlot">Ad space — AdSense approve ke baad yahan ad aayega</div>
+  <div class="drop" id="dropEl"><div style="font-size:34px;">📷</div><h2 style="margin:8px 0 0;">Photo chuno ya drag karo</h2><p style="color:#9a9ab0;font-size:13px;">JPG / PNG / WebP • 100% browser me, upload nahi hota</p></div>
+  <input type="file" id="fileInput" accept="image/*">
+  <div class="row">
+    <label>Size: <select id="scaleSel"><option value="2">2x HD</option><option value="4" selected>4x Ultra HD</option></select></label>
+    <label>Format: <select id="fmtSel"><option value="image/png">PNG</option><option value="image/jpeg" selected>JPG</option></select></label>
+    <label>Enhance: <select id="enhSel"><option value="on" selected>On</option><option value="off">Off</option></select></label>
+  </div>
+  <button class="goBtn" id="goBtn" disabled>Photo chuno pehle</button>
+  <div id="statusEl" style="font-size:13px;color:#9a9ab0;margin-top:8px;"></div>
+  <div class="card" id="outCard" style="display:none;">
+    <b id="outTitle">Result</b>
+    <div class="comp"><div><div style="font-size:12px;color:#9a9ab0;">Before</div><img id="beforeImg"></div><div><div style="font-size:12px;color:#9a9ab0;">After HD</div><img id="afterImg"></div></div>
+    <div class="btnRow"><button class="primary" id="dlBtn">⬇ Download HD</button><button id="newBtn">＋ New photo</button></div>
+    <div id="infoEl" style="font-size:12px;color:#9a9ab0;margin-top:8px;"></div>
+  </div>
+  <div class="card"> <b>Note:</b> Ye tool browser me hi photo ko 2x/4x bada karke sharp karta hai ( alleged 4K size ). Purani bahut blur photo ekdum DSLR jaisi nahi banegi, lekin size + sharpness clearly badhegi. Koi upload nahi hota, private hai. Max ~3000px wali photo best chalti hai, bahut badi photo slow ho sakti hai. </div>
+  <div class="adSlot">Ad space 2</div>
+  <div class="footer">photoHD • Owner: <b>Sanjeev Kumar</b><br><a href="#about" style="color:#8b9bff;">About</a> • <a href="#privacy" style="color:#8b9bff;">Privacy</a> • <a href="#contact" style="color:#8b9bff;">Contact</a></div>
+  <div class="card" id="about"><b>About</b><br>Owner: Sanjeev Kumar<br>Low quality photo ko HD/4K size me convert karo, free.</div>
+  <div class="card" id="privacy"><b>Privacy Policy</b><br>Owner: Sanjeev Kumar<br>• Photo aapke phone/browser se bahar nahi jati.<br>• Koi server upload nahi. AdSense ads par Google cookies use kar sakta hai.</div>
+  <div class="card" id="contact"><b>Contact</b><br>Owner: Sanjeev Kumar<br>GitHub repo me Issue banao.</div>
+</div>
+<script>
+(function(){
+  const dropEl=document.getElementById("dropEl"), fi=document.getElementById("fileInput"),
+  goBtn=document.getElementById("goBtn"), st=document.getElementById("statusEl"),
+  outCard=document.getElementById("outCard"), beforeImg=document.getElementById("beforeImg"),
+  afterImg=document.getElementById("afterImg"), dlBtn=document.getElementById("dlBtn"),
+  newBtn=document.getElementById("newBtn"), infoEl=document.getElementById("infoEl"),
+  scaleSel=document.getElementById("scaleSel"), fmtSel=document.getElementById("fmtSel"), enhSel=document.getElementById("enhSel");
+  let img=null, fname="photo", outURL=null;
+  dropEl.onclick=()=>fi.click();
+  ["dragover","dragenter"].forEach(e=>dropEl.addEventListener(e,ev=>{ev.preventDefault();dropEl.classList.add("drag")}));
+  ["dragleave","drop"].forEach(e=>dropEl.addEventListener(e,ev=>{ev.preventDefault();dropEl.classList.remove("drag")}));
+  dropEl.addEventListener("drop",e=>{const f=e.dataTransfer.files[0]; if(f) load(f)});
+  fi.onchange=()=>{if(fi.files[0]) load(fi.files[0])};
+  function load(f){
+    if(!f.type.startsWith("image/")){alert("Sirf photo chuno");return}
+    fname=(f.name||"photo").replace(/\.[^.]+$/,"");
+    const url=URL.createObjectURL(f);
+    const im=new Image();
+    im.onload=()=>{img=im; beforeImg.src=url; goBtn.disabled=false; goBtn.textContent="✨ HD Convert karo"; st.textContent=f.name+" loaded ✓"; outCard.style.display="none"};
+    im.src=url;
+  }
+  goBtn.onclick=()=>{
+    if(!img) return;
+    st.textContent="Processing…";
+    setTimeout(process,50);
+  };
+  function process(){
+    const s=parseInt(scaleSel.value,10);
+    let w=img.naturalWidth, h=img.naturalHeight;
+    let nw=Math.min(w*s, 3840), nh=Math.round(h*nw/w);
+    if(nw>3840){nh=Math.round(nh*3840/nw); nw=3840}
+    const c=document.createElement("canvas"); c.width=nw; c.height=nh;
+    const x=c.getContext("2d");
+    x.imageSmoothingEnabled=true; x.imageSmoothingQuality="high";
+    x.drawImage(img,0,0,nw,nh);
+    if(enhSel.value==="on"){
+      try{
+        const d=x.getImageData(0,0,nw,nh), p=d.data;
+        for(let i=0;i<p.length;i+=4){for(let k=0;k<3;k++){let v=p[i+k]; v= (v-128)*1.12+128 + 6; p[i+k]=v>255?255:v<0?0:v}}
+        x.putImageData(d,0,0);
+      }catch(e){}
+    }
+    const type=fmtSel.value;
+    outURL=c.toDataURL(type, type==="image/jpeg"?0.92:undefined);
+    afterImg.src=outURL;
+    outCard.style.display="block";
+    infoEl.textContent=w+"x"+h+" → "+nw+"x"+nh+" • "+(type==="image/png"?"PNG":"JPG");
+    st.textContent="Ho gaya ✓";
+    outCard.scrollIntoView({behavior:"smooth"});
+  }
+  dlBtn.onclick=()=>{
+    if(!outURL) return;
+    const a=document.createElement("a");
+    a.href=outURL; a.download=fname+"-HD."+(fmtSel.value==="image/png"?"png":"jpg");
+    a.click();
+  };
+  newBtn.onclick=()=>{fi.value=""; img=null; outURL=null; goBtn.disabled=true; goBtn.textContent="Photo chuno pehle"; outCard.style.display="none"; st.textContent=""; fi.click()};
+})();
+</script>
